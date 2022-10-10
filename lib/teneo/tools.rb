@@ -6,5 +6,6 @@ require_relative "tools/extensions"
 
 module Teneo
   module Tools
+    autoload :Logger, "teneo/tools/logger"
   end
 end
