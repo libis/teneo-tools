@@ -2,9 +2,9 @@
 
 require_relative "tools/version"
 
+require_relative "tools/extensions"
+
 module Teneo
   module Tools
-    class Error < StandardError; end
-    # Your code goes here...
   end
 end
