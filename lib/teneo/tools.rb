@@ -3,6 +3,7 @@
 require_relative "tools/version"
 
 require_relative "tools/extensions"
+require_relative "tools/parameter"
 
 module Teneo
   module Tools
