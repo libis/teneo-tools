@@ -2,6 +2,7 @@
 
 require "bundler/gem_tasks"
 require "rspec/core/rake_task"
+require_relative "lib/teneo/tools/version"
 
 RSpec::Core::RakeTask.new(:spec)
 
@@ -12,10 +13,8 @@ require "github_changelog_generator/task"
 GitHubChangelogGenerator::RakeTask.new :changelog do |config|
   config.user = "libis"
   config.project = "teneo-tools"
-  config.unreleased = false
+  config.future_release = ::Teneo::Tools::VERSION
 end
-
-require_relative "lib/teneo/tools/version"
 
 desc "release the gem"
 task :update_changelog do
@@ -24,20 +23,23 @@ task :update_changelog do
   `git push`
 end
 
-desc "publish patch version"
+desc "bump patch version"
+task :patch do
+  `gem bump patch`
+end
+
+desc "bump minor version"
+task :minor do
+  `gem bump minor`
+end
+
+desc "bump major version"
+task :major do
+  `gem bump major`
+end
+
+desc "publish the gem"
 task :publish do
-  `gem bump patch --push --tag --release`
-  `rake update_changelog`
-end
-
-desc "publish minor version"
-task :publish_minor do
-  `gem bump minor --push --tag --release`
-  `rake update_changelog`
-end
-
-desc "publish minor version"
-task :publish_major do
-  `gem bump major --push --tag --release`
-  `rake update_changelog`
+  `rake changelog`
+  `gem bump #{::Teneo::Tools::VERSION} --tag --push --release`
 end
