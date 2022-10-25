@@ -25,21 +25,21 @@ end
 
 desc "bump patch version"
 task :patch do
-  `gem bump patch`
+  `gem bump -v patch`
 end
 
 desc "bump minor version"
 task :minor do
-  `gem bump minor`
+  `gem bump -v minor`
 end
 
 desc "bump major version"
 task :major do
-  `gem bump major`
+  `gem bump -v major`
 end
 
 desc "publish the gem"
 task :publish do
   `rake changelog`
-  `gem bump #{::Teneo::Tools::VERSION} --tag --push --release`
+  `gem bump -v #{::Teneo::Tools::VERSION} --tag --push --release`
 end
