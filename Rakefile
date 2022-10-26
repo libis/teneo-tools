@@ -40,6 +40,7 @@ end
 
 desc "publish the gem"
 task :publish do
+  `rake build`
   `rake changelog`
   `gem bump -v #{::Teneo::Tools::VERSION} --tag --push --release`
 end
