@@ -32,8 +32,9 @@ module Teneo
         # @param :frozen - Boolean. Default is false; if true the parameter value cannot be changed from the default value.
         # @param :options - Any Hash. It's up to the application to interprete and use this info.
         def initialize(**opts)
-          super(**opts)
+          super(**(opts.slice(*members)))
           self[:options] ||= {}
+          self[:options].merge!(opts.except(*members))
           self[:datatype] ||= guess_datatype
         end
 
