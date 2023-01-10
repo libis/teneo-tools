@@ -98,7 +98,7 @@ class Hash
   def obj_deep_transform_keys(obj, &block)
     case obj
     when Hash
-      obj.each_with_object({}) { |(k, v), h| y[yield(k)] = obj_deep_transform_keys(v, &block) }
+      obj.each_with_object({}) { |(k, v), h| h[yield(k)] = obj_deep_transform_keys(v, &block) }
     when Array
       obj.map { |x| obj_deep_transform_keys(x, &block) }
     else
