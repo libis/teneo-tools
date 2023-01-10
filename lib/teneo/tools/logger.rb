@@ -41,6 +41,9 @@ module Teneo
     #
 
     module Logger
+
+      include SemanticLogger::Loggable
+
       class Appender
         include SemanticLogger::Appender
       end
@@ -48,47 +51,43 @@ module Teneo
       class Formatter < SemanticLogger::Formatters::Default
       end
 
-      def self.included(klass)
-        klass.include SemanticLogger::Loggable
-        klass.class_eval do
-          def logger_name
-            "#{self.class.name}-#{self.object_id}"
-          end
-
-          def logger(name = nil)
-            @semantic_logger ||= SemanticLogger[name || logger_name]
-          end
-
-          def add_appender(**appender, &block)
-            appender = { filter: /^#{logger_name}$/ }.merge(appender)
-            SemanticLogger.add_appender(**appender, &block)
-          end
-
-          def tagged(*args, &block)
-            SemanticLogger.tagged(*args, &block)
-          end
-        end
+      def logger_name
+        "#{self.class.name}"
       end
 
-      def self.default_level=(level)
+      def add_appender(**appender, &block)
+        appender = { filter: /^#{logger_name}$/ }.merge(appender)
+        SemanticLogger.add_appender(**appender, &block)
+      end
+    
+      def tagged(*args, &block)
+        SemanticLogger.tagged(*args, &block)
+      end
+
+      def default_level=(level)
         SemanticLogger.default_level = level
       end
 
-      def self.default_level
+      def default_level
         SemanticLogger.default_level
       end
 
-      def self.add_appender(**appender, &block)
-        SemanticLogger.add_appender(**appender, &block)
+      def clear_appenders!
+        SemanticLogger.clear_appenders!
       end
 
-      def self.reopen
+      def reopen
         SemanticLogger.reopen
       end
 
-      def self.flush
+      def flush
         SemanticLogger.flush
       end
+
+      def logger()
+        @semantic_logger ||= SemanticLogger[logger_name]
+      end
+
     end
   end
 end

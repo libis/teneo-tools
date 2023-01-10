@@ -12,6 +12,14 @@ SemanticLogger.default_level = :trace
 class TestLogger
   include Teneo::Tools::Logger
 
+  def initialize(name = nil)
+    @name = name
+  end
+
+  def logger_name
+    @name || super
+  end
+
   def init
     @tag = @message = @data = @exception = @duration = @metric = @metric_amount = nil
   end
@@ -23,14 +31,14 @@ class TestLogger
     logger.warn message
     logger.error message
     logger.fatal message
-    Teneo::Tools::Logger.flush
+    flush
     init
     @message = message
   end
 
   def test_data(message: "message", data:)
     logger.info message, data
-    Teneo::Tools::Logger.flush
+    flush
     init
     @message = message
     @data = data
@@ -38,7 +46,7 @@ class TestLogger
 
   def test_hash(message: "message", hash:)
     logger.error message: message, payload: hash
-    Teneo::Tools::Logger.flush
+    flush
     init
     @message = message
     @data = hash
@@ -46,7 +54,7 @@ class TestLogger
 
   def test_exception(message: "message", exception:)
     logger.fatal message, exception
-    Teneo::Tools::Logger.flush
+    flush
     init
     @message = message
     @exception = exception
@@ -54,13 +62,13 @@ class TestLogger
 
   def test_full(message: nil, payload: nil, exception: nil, duration: nil, metric: nil, metric_amount: nil, tag: nil)
     if tag
-      tagged(tag) do
+      logger.tagged(tag) do
         logger.debug message: message, payload: payload, exception: exception, duration: duration, metric: metric, metric_amount: metric_amount
       end
     else
       logger.debug message: message, payload: payload, exception: exception, duration: duration, metric: metric, metric_amount: metric_amount
     end
-    Teneo::Tools::Logger.flush
+    flush
     init
     @tag = tag
     @message = message
@@ -71,11 +79,11 @@ class TestLogger
     @metric_amount = metric_amount
   end
 
-  def log_regex(level: "TDIWEF")
+  def log_regex(level: "TDIWEF", name: nil)
     proc_info = "#{Process.pid}:#{Thread.current.object_id}( #{File.basename(__FILE__)}:\\d+)?"
     tag_info = "\\[#{@tag}\\] " if @tag
     duration_info = format('\\(%0.1fms\\) ', @duration) if @duration.is_a?(Numeric)
-    class_info = logger_name
+    class_info = name || logger_name
     message = " -- #{@message}"
     message += " -- #{@data.to_s}" if @data
     message += " -- Exception: #{@exception.class.name}: #{@exception.to_s}" if @exception
@@ -145,41 +153,47 @@ RSpec.describe Teneo::Tools::Logger do
     end
 
     it "performs full-option logging" do
-      @tl.test_full message: "message", payload: { data1: "abc", data2: "xyz" },
+      @tl.test_full(message: "message", payload: { data1: "abc", data2: "xyz" },
                     exception: RuntimeError.new("Some error occurred"),
                     duration: 10, metric: "abc/xyz", metric_amount: 12345,
                     tag: "abc_xyz"
+      )
       expect(@output.string).to match @tl.log_regex(level: "D")
     end
   end
 
   context "with two loggers" do
     before(:each) do
-      @output = StringIO.new
-      @tl.add_appender(io: @output, level: :debug)
-      @tl2 = TestLogger.new
+      @tl1 = TestLogger.new('abcdef')
+      @tl2 = TestLogger.new('xyz123')
+      @output1 = StringIO.new
+      @tl1.add_appender(io: @output1, level: :debug)
       @output2 = StringIO.new
       @tl2.add_appender(io: @output2, level: :trace)
+      @output3 = StringIO.new
+      @tl2.add_appender(io: @output3, level: :trace, filter: nil)
+      @tl1.test_logs
+      @tl2.test_logs
     end
 
     it "and each has a separate log" do
-      @tl.test_logs
-      @output.string.split("\n").each_with_index do |l, i|
-        expect(l).to match @tl.log_regex(level: "DIWEF"[i])
+      expect(@output1.string.split("\n").size).to eq 5
+      @output1.string.split("\n").each_with_index do |l, i|
+        expect(l).to match @tl1.log_regex(level: "DIWEF"[i], name: 'abcdef')
       end
-      @tl2.test_logs
+      expect(@output2.string.split("\n").size).to eq 6
       @output2.string.split("\n").each_with_index do |n, i|
-        expect(n).to match @tl2.log_regex(level: "TDIWEF"[i])
+        expect(n).to match @tl2.log_regex(level: "TDIWEF"[i], name: 'xyz123')
       end
     end
 
     it "unless filter is overruled" do
-      @tl2 = TestLogger.new
-      @output2 = StringIO.new
-      @tl2.add_appender(io: @output2, level: :trace, filter: nil)
-      @tl.test_logs
-      @output2.string.split("\n").each_with_index do |n, i|
-        expect(n).to match @tl.log_regex(level: "TDIWEF"[i])
+      expect(@output3.string.split("\n").size).to eq 12
+      @output3.string.split("\n")[0...6].each_with_index do |n, i|
+        expect(n).to match @tl1.log_regex(level: "TDIWEF"[i], name: 'abcdef')
+      end
+      @output3.string.split("\n")[6..-1].each_with_index do |n, i|
+        expect(n).to match @tl2.log_regex(level: "TDIWEF"[i], name: 'xyz123')
       end
     end
   end
