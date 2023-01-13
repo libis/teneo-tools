@@ -25,7 +25,7 @@ class TestLogger
   end
 
   def test_logs(message: "message")
-    # trace message
+    trace message
     debug message
     info message
     warn message
@@ -121,7 +121,7 @@ RSpec.describe Teneo::Tools::Logger do
 
   context "with StringIO appender" do
     before(:each) do
-      @output = @tl.add_appender(:string_io, "output", level: :debug).sio
+      @output = @tl.add_appender(:string_io, "output", level: :trace).sio
     end
 
     after(:each) do
@@ -132,7 +132,7 @@ RSpec.describe Teneo::Tools::Logger do
     it "performs standard logging operations" do
       @tl.test_logs
       @output.string.split("\n").each_with_index do |l, i|
-        expect(l).to match @tl.log_regex(level: %w"DEBUG INFO WARN ERROR FATAL"[i])
+        expect(l).to match @tl.log_regex(level: %w"TRACE DEBUG INFO WARN ERROR FATAL"[i])
       end
     end
 

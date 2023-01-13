@@ -5,10 +5,7 @@ require "amazing_print"
 
 module Teneo
   module Tools
-    # LOG_LEVELS = [:trace, :debug, :info, :warn, :error, :fatal]
-    # Logging.init(LOG_LEVELS)
-    ::Logging.init
-    ::Logging.format_as "inspect"
+    ::Logging.init(:trace, :debug, :info, :warn, :error, :fatal)
 
     # This module adds logging functionality to any class.
     #
