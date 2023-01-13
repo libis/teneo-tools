@@ -31,7 +31,7 @@ Gem::Specification.new do |spec|
   spec.executables = spec.files.grep(%r{\Aexe/}) { |f| File.basename(f) }
   spec.require_paths = ["lib"]
 
-  spec.add_runtime_dependency "semantic_logger", "~> 4.11"
+  spec.add_runtime_dependency "logging", "~> 2.3.1"
   spec.add_runtime_dependency "concurrent-ruby", "~> 1.0"
 
   spec.add_development_dependency "amazing_print", "~> 1.4"

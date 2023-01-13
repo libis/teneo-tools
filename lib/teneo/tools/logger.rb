@@ -1,9 +1,14 @@
 # frozen_string_literal: true
 
-require "semantic_logger"
+require "logging"
+require "amazing_print"
 
 module Teneo
   module Tools
+    # LOG_LEVELS = [:trace, :debug, :info, :warn, :error, :fatal]
+    # Logging.init(LOG_LEVELS)
+    ::Logging.init
+    ::Logging.format_as "inspect"
 
     # This module adds logging functionality to any class.
     #
@@ -41,53 +46,134 @@ module Teneo
     #
 
     module Logger
+      Event = Struct.new(:message, :context, :payload, :exception, :duration, keyword_init: true) do
+        BACKTRACE_SPLIT = "\n\t -- "
 
-      include SemanticLogger::Loggable
-
-      class Appender
-        include SemanticLogger::Appender
+        def log_info
+          context_info = "-- #{context}" if context && !context.to_s.blank?
+          duration_info = format("(%0.1f ms)", duration) if duration && duration.is_a?(Numeric)
+          msg_list = [":"]
+          msg_list << "#{payload.to_s} ;" if payload
+          msg_list << "#{message}"
+          msg_list << "# Exception: #{exception.class.name} - #{exception.to_s}" if exception
+          msg_info = msg_list.compact.join " "
+          msg += BACKTRACE_SPLIT + exception.backtrace.join(BACKTRACE_SPLIT) if exception&.backtrace
+          [context_info, duration_info, msg_info].compact.join " "
+        rescue => e
+          ap e
+          ap e.backtrace
+        end
       end
 
-      class Formatter < SemanticLogger::Formatters::Default
+      DEFAULT_LOG_LAYOUT_PARAMETERS = {
+        pattern: "%.1l, [%d #%p.%t] %5l %m\n",
+        date_pattern: "%Y-%m-%dT%H:%M:%S.%6N",
+        format_as: "string",
+      }
+
+      class Formatter < ::Logging::Layouts::Pattern
+        def format_obj(obj)
+          if obj.is_a?(::Teneo::Tools::Logger::Event)
+            obj.log_info
+          else
+            super
+          end
+        end
+      end
+
+      module ClassMethods
+        def default_formatter
+          ::Teneo::Tools::Logger::Formatter.new(DEFAULT_LOG_LAYOUT_PARAMETERS)
+        end
+
+        def appender(type, *args, **opts)
+          opts[:layout] = default_formatter
+          if levels = opts.delete(:level_filter)
+            opts[:filters] ||= []
+            opts[:filters] << ::Logging::Filters::Level.new(*levels)
+          end
+          ::Logging.appenders.send(type, *args, **opts)
+        end
+      end
+
+      def self.included(klass)
+        klass.extend ClassMethods
+        ::Logging::LEVELS.each do |level, number|
+          klass.define_method(level) do |*args, **opts|
+            event = build_logger_event(*args, **opts)
+            logger.send(level, event)
+          end
+        end
+      end
+
+      def logger
+        Logging.logger[logger_name]
       end
 
       def logger_name
         "#{self.class.name}"
       end
 
-      def add_appender(**appender, &block)
-        appender = { filter: /^#{logger_name}$/ }.merge(appender)
-        SemanticLogger.add_appender(**appender, &block)
+      def clear_appenders!
+        logger.clear_appenders
       end
-    
-      def tagged(*args, &block)
-        SemanticLogger.tagged(*args, &block)
+
+      def add_appender(*args, **opts)
+        appender = self.class.appender(*args, **opts)
+        logger.add_appenders(appender)
+        appender
       end
 
       def default_level=(level)
-        SemanticLogger.default_level = level
+        loger.level = level
       end
 
       def default_level
-        SemanticLogger.default_level
+        logger.level
       end
 
-      def clear_appenders!
-        SemanticLogger.clear_appenders!
+      def clear!
+        logger.appenders.each do |appender|
+          if appender.respond_to?(:clear!)
+            appender.clear!
+          end
+        end
+      end
+
+      def close
+        logger.appenders.each do |appender|
+          appender.close
+        end
       end
 
       def reopen
-        SemanticLogger.reopen
+        logger.appenders.each do |appender|
+          appender.reopen
+        end
       end
 
       def flush
-        SemanticLogger.flush
+        logger.appenders.each do |appender|
+          appender.flush
+        end
       end
 
-      def logger()
-        @semantic_logger ||= SemanticLogger[logger_name]
+      def context
+        logger_name
       end
 
+      def build_logger_event(*args, **opts)
+        if args.size > 0
+          begin
+            message = args.first % args[1..]
+          rescue
+            message = args.join(" - ")
+          end
+        end
+        opts[:message] ||= message || ""
+        opts[:context] ||= context
+        Teneo::Tools::Logger::Event.new(**opts)
+      end
     end
   end
 end
