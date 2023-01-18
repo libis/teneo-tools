@@ -43,7 +43,7 @@ module Teneo
     #
 
     module Logger
-      Event = Struct.new(:message, :context, :payload, :exception, :duration, keyword_init: true) do
+      Event = Struct.new(:severity, :message, :context, :payload, :exception, :duration, keyword_init: true) do
         BACKTRACE_SPLIT = "\n\t -- "
 
         def log_info
@@ -97,7 +97,7 @@ module Teneo
         klass.extend ClassMethods
         ::Logging::LEVELS.each do |level, number|
           klass.define_method(level) do |*args, **opts|
-            event = build_logger_event(*args, **opts)
+            event = build_logger_event(*args, severity: level.to_s.upcase, **opts)
             logger.send(level, event)
           end
         end
