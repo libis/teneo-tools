@@ -19,32 +19,32 @@ end
 
 desc "release the gem"
 task update_changelog: :changelog do
-  `git commit -am 'Changelog update'`
-  `git push`
+  puts `git commit -am 'Changelog update'`
+  puts `git push`
 end
 
 desc "bump patch version"
 task :patch do
-  `gem bump -v patch --no-commit`
+  puts `gem bump -v patch --no-commit`
   `rake publish`
 end
 
 desc "bump minor version"
 task :minor do
-  `gem bump -v minor --no-commit`
+  puts `gem bump -v minor --no-commit`
   `rake publish`
 end
 
 desc "bump major version"
 task :major do
-  `gem bump -v major --no-commit`
+  puts `gem bump -v major --no-commit`
   `rake publish`
 end
 
 desc "publish the gem"
 task :publish do
-  `bundle install`
-  `git commit -am 'Version bump: #{::Teneo::Tools::VERSION}'`
-  `gem release --tag --push --github`
-  `rake update_changelog`
+  puts `bundle install`
+  puts `git commit -am 'Version bump: #{::Teneo::Tools::VERSION}'`
+  puts `gem release --tag --push --github`
+  puts `rake update_changelog`
 end
