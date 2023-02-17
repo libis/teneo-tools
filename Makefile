@@ -1,7 +1,6 @@
-include .env
-export
-
-VERSION = $(shell awk --field-separator '"' '/VERSION/' $(VERSION_FILE))
+PROJECT_LIB := $(shell find lib -mindepth 2 -maxdepth 2 -type d)
+PROJECT := $(shell echo "$(PROJECT_LIB)" | awk -F '/' '{print $$2 "-" $$3}')
+VERSION = $(shell awk --field-separator '"' '/VERSION/' $(PROJECT_LIB)/version.rb)
 
 patch: _patch _publish
 
@@ -21,5 +20,5 @@ _major:
 _publish:
 	bundle install
 	git commit -am 'Version bump: $(VERSION)'
-	gem release --tag --push --github --key github --token $(GITHUB_RELEASE_TOKEN)
+	rake release
 	github_changelog_generator --token $(CHANGELOG_GITHUB_TOKEN)
