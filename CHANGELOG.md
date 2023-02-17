@@ -1,24 +1,8 @@
 # Changelog
 
-## [v0.1.13](https://github.com/libis/teneo-tools/tree/v0.1.13) (2023-02-17)
+## [v0.2.0](https://github.com/libis/teneo-tools/tree/v0.2.0) (2023-02-17)
 
-[Full Changelog](https://github.com/libis/teneo-tools/compare/v0.1.12...v0.1.13)
-
-## [v0.1.12](https://github.com/libis/teneo-tools/tree/v0.1.12) (2023-02-17)
-
-[Full Changelog](https://github.com/libis/teneo-tools/compare/v0.1.11...v0.1.12)
-
-## [v0.1.11](https://github.com/libis/teneo-tools/tree/v0.1.11) (2023-02-17)
-
-[Full Changelog](https://github.com/libis/teneo-tools/compare/v0.1.10...v0.1.11)
-
-## [v0.1.10](https://github.com/libis/teneo-tools/tree/v0.1.10) (2023-02-17)
-
-[Full Changelog](https://github.com/libis/teneo-tools/compare/v0.1.9...v0.1.10)
-
-## [v0.1.9](https://github.com/libis/teneo-tools/tree/v0.1.9) (2023-02-17)
-
-[Full Changelog](https://github.com/libis/teneo-tools/compare/v0.1.5...v0.1.9)
+[Full Changelog](https://github.com/libis/teneo-tools/compare/v0.1.5...v0.2.0)
 
 ## [v0.1.5](https://github.com/libis/teneo-tools/tree/v0.1.5) (2023-02-15)
 
