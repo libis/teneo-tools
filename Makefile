@@ -21,5 +21,5 @@ _major:
 _publish:
 	bundle install
 	git commit -am 'Version bump: $(VERSION)'
-	gem release --tag --push --github
+	gem release --tag --push --github --key github
 	github_changelog_generator --token $(CHANGELOG_GITHUB_TOKEN)
