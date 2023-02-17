@@ -25,3 +25,4 @@ _publish:
 	@rake release
 	@github_changelog_generator --user libis --project $(PROJECT) --token $(CHANGELOG_GITHUB_TOKEN) --no-verbose
 	@git commit -am 'Changelog update'
+	@git push
