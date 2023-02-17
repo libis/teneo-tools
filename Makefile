@@ -21,4 +21,5 @@ _publish:
 	bundle install
 	git commit -am 'Version bump: $(VERSION)'
 	rake release
-	github_changelog_generator --token $(CHANGELOG_GITHUB_TOKEN)
+	github_changelog_generator --user libis --project $(PROJECT) --token $(CHANGELOG_GITHUB_TOKEN)
+	git commit -am 'Changelog update'
