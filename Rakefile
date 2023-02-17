@@ -18,8 +18,7 @@ GitHubChangelogGenerator::RakeTask.new :changelog do |config|
 end
 
 desc "release the gem"
-task :update_changelog do
-  `rake changelog`
+task update_changelog: :changelog do
   `git commit -am 'Changelog update'`
   `git push`
 end
@@ -42,6 +41,5 @@ end
 desc "publish the gem"
 task :publish do
   `rake build`
-  `rake changelog`
   `gem bump -v #{::Teneo::Tools::VERSION} --tag --push --release`
 end
