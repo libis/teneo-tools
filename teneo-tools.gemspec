@@ -6,7 +6,7 @@ Gem::Specification.new do |spec|
   spec.name = "teneo-tools"
   spec.version = Teneo::Tools::VERSION
   spec.authors = ["Kris Dekeyser"]
-  spec.email = ["kris.dekeyser@libis.be"]
+  spec.email = ["kris.dekeyser@kuleuven.be"]
 
   spec.summary = "Various tool classes and modules for Teneo."
   spec.description = "This gem collects a number of utility classes and modules in use by the Teneo applications."
@@ -14,7 +14,7 @@ Gem::Specification.new do |spec|
   spec.license = "MIT"
   spec.required_ruby_version = ">= 3.0.0"
 
-  spec.metadata["allowed_push_host"] = "https://github.com/libis/teneo-tools"
+  spec.metadata["allowed_push_host"] = "https://rubygems.pkg.github.com/libis"
 
   spec.metadata["homepage_uri"] = spec.homepage
   spec.metadata["source_code_uri"] = "https://github.com/libis/teneo-tools"
