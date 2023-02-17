@@ -1,6 +1,6 @@
 PROJECT_LIB := $(shell find lib -mindepth 2 -maxdepth 2 -type d)
 PROJECT := $(shell echo "$(PROJECT_LIB)" | awk -F '/' '{print $$2 "-" $$3}')
-VERSION = $(shell awk --field-separator '"' '/VERSION/' $(PROJECT_LIB)/version.rb)
+VERSION = $(shell awk --field-separator '"' '/VERSION/ {print $$2}' $(PROJECT_LIB)/version.rb)
 
 patch: _patch _publish
 
