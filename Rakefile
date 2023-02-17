@@ -14,6 +14,7 @@ GitHubChangelogGenerator::RakeTask.new :changelog do |config|
   config.user = "libis"
   config.project = "teneo-tools"
   config.future_release = ::Teneo::Tools::VERSION
+  config.unreleased = false
 end
 
 desc "release the gem"
