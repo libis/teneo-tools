@@ -11,8 +11,11 @@ orbs:
 # See: https://circleci.com/docs/2.0/configuration-reference/#jobs
 jobs:
   test:
+    parameters:
+      version:
+        type: string
     docker:
-      - image: cimg/ruby:3.1.
+      - image: cimg/ruby:<< parameters.version >>
     executor: ruby/default
     steps:
       - checkout
@@ -25,4 +28,7 @@ workflows:
   sample: # This is the name of the workflow, feel free to change it to better match your workflow.
     # Inside the workflow, you define the jobs you want to run.
     jobs:
-      - test
+      - test:
+        version: 3.1
+      - test:
+        version: 3.2
