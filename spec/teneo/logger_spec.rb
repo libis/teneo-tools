@@ -3,8 +3,6 @@
 require "teneo/tools/logger"
 require "amazing_print"
 
-require "rspec/logging_helper"
-
 require "timecop"
 TIME = Time.now
 TIMESTRING = TIME.strftime("%Y-%m-%dT%H:%M:%S.%6N")

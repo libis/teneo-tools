@@ -1,5 +1,4 @@
 # encoding: utf-8
-require_relative File.join('..', "spec_helper")
 
 require "teneo/tools/parameter/container"
 

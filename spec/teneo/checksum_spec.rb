@@ -1,5 +1,5 @@
 # encoding: utf-8
-require_relative File.join('..', 'spec_helper')
+
 require 'teneo/tools/checksum'
 
 RSpec.describe Teneo::Tools::Checksum do
