@@ -9,5 +9,6 @@ module Teneo
   module Tools
     autoload :Logger, "teneo/tools/logger"
     autoload :Checksum, "teneo/tools/checksum"
+    autoload :Storage, "teneo/tools/storage"
   end
 end
