@@ -14,6 +14,7 @@ gem "rspec_junit_formatter"
 gem "rufo", require: false
 gem "debug", require: false
 gem "ruby-debug-ide", require: false
+gem "standardrb", require: false
 
 # Gem publishing and changelog
 gem "gem-release"
