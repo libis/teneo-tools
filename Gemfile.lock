@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    teneo-tools (0.2.2)
+    teneo-tools (0.2.3)
       concurrent-ruby (~> 1.0)
       logging (~> 2.3.1)
 
