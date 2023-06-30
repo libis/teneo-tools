@@ -69,26 +69,26 @@ module Teneo
 
         def open(**opts)
           localize
-          mode = opts[:mode] || 'rb'
+          mode = opts[:mode] || "rb"
           perm = opts[:perm] || @driver.perm || 0644
           ::File.open(@localfile, mode, perm, **opts) do |f|
             block_given? ? yield(f) : f.read
           end
         end
 
-        def read(**opts)
+        def reader(**opts)
           return nil unless exist?
           localize
           return nil unless ::File.readable?(@localfile)
-          opts[:mode] ||= 'rb'
+          opts[:mode] ||= "rb"
           self.open(**opts) do |f|
             block_given? ? yield(f) : f.read
           end
         end
 
-        def write(data = nil, **opts)
+        def writer(data = nil, **opts)
           return nil unless self.writable?(@localfile)
-          opts[:mode] ||= 'wb'
+          opts[:mode] ||= "wb"
           self.open(**opts) do |f|
             block_given? ? yield(f, data) : f.write(data)
           end
@@ -96,13 +96,14 @@ module Teneo
         end
 
         def append(data = nil, **opts)
-          opts[:mode] ||= 'ab'
+          opts[:mode] ||= "ab"
           self.open(**opts) do |f|
             block_given? ? yield(f, data) : f.write(data)
           end
           save
         end
 
+        BUFSIZE = 1024 * 1024
         def transfer(target, **opts)
           case target
           when nil
@@ -110,9 +111,15 @@ module Teneo
           when String
             @driver.cp(path, target, **opts)
           when ::Teneo::Storage::Blob
-            self.read(mode: 'rb') do |f|
-              f.read()
-            
+            target.writer(**opts) do |w|
+              self.reader() do |r|
+                do
+                  w.write(r.read(BUFSIZE))
+                until r.eof?
+              end
+            end
+          end
+        end
       end
     end
   end
