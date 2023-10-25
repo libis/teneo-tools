@@ -1,6 +1,5 @@
 # frozen_string_literal: true
 
-require "pathname"
 require "fileutils"
 
 module Teneo
@@ -9,11 +8,9 @@ module Teneo
       # Reference to a single (file) object in a storage object
       class Blob
         class Cleaner
-          # @param [String] tmpfile
-          def initialize(driver:, path:, localpath:)
+          # @param [String] localpath
+          def initialize(localpath:)
             @pid = Process.pid
-            @driver = driver
-            @path = path
             @localpath = localpath
           end
 
@@ -33,20 +30,51 @@ module Teneo
           @path = path
           @options = options
           @localized = false
-          if driver.local?
-            @localfile = @driver.fullpath
-          else
-            @localfile = ::File.join(driver.work_dir, path)
-            @cleaner = Cleaner.new(driver: driver, path: path, localpath: @localfile)
-            ObjectSpace.define_finalizer(self, @cleaner)
-          end
+          @localfile = to_localpath(path)
+          make_finalizer
+        end
+
+        def driver_path
+          @driver.relpath(@path)
+        end
+
+        def exist?
+          @driver.exist?(driver_path)
+        end
+
+        def local?
+          @driver.local?
+        end
+
+        def protocol
+          @driver.protocol
+        end
+
+        def delete
+          @driver.delete(driver_path)
+        end
+
+        def mtime
+          @driver.mtime(driver_path)
+        end
+
+        def size
+          @driver.size(driver_path)
+        end
+
+        def rename(new_name)
+          do_move(File.join(File.dirname(@path), new_name))
+        end
+
+        def move(new_dir)
+          do_move(File.join(File.dirname(@path), File.basename(@path)))
         end
 
         def localize(force: false)
           return nil if @driver.local?
           return nil if @localized && !force
           raise Errno::ENOENT unless exist?
-          FileUtils.mkpath(::File.dirname(@localfile))
+          FileUtils.mkpath(File.dirname(@localfile))
           if exist?
             @driver.download(remote: @path, local: @localfile)
           end
@@ -109,7 +137,7 @@ module Teneo
           when nil
             return false
           when String
-            @driver.cp(path, target, **opts)
+            @driver.copy(source: path, target: target, **opts)
           when ::Teneo::Storage::Blob
             target.writer(**opts) do |w|
               self.reader() do |r|
@@ -120,6 +148,44 @@ module Teneo
             end
           end
         end
+
+        protected
+
+        def to_localpath(ext_path = nil)
+          ext_path ||= @path
+          local_path = if @driver.local?
+            @driver.fullpath(ext_path)
+          else
+            ::File.join(driver.work_dir, ext_path)
+          end
+        end
+
+        def make_finalizer
+          unless driver.local?
+            @cleaner = Cleaner.new(localpath: @localfile)
+            ObjectSpace.define_finalizer(self, @cleaner)
+          end
+        end
+
+        def do_move(new_path)
+          new_localpath = to_localpath(new_path)
+          if local?
+            do_move_local(new_localpath)
+          else
+            if localized?
+              do_move_local(new_localpath)
+            end
+            @driver.move(source: @path, target: new_path)
+          end
+          @localfile = new_localpath
+          @path = new_path
+        end
+
+        def do_move_local(new_localpath)
+          FileUtils.mkpath(File.dirname(new_localpath))
+          FileUtils.move(@localfile, new_localpath)
+        end
+
       end
     end
   end
